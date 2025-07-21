@@ -5,7 +5,7 @@ This is a full-stack web app built as an assignment from **Hitesh Choudhary**’
 The course provided the base, and the rest of the project was built independently.
 
 🎥 Course Reference: [Watch here](https://youtu.be/c8Z73cVl6x4?si=Q2H7j9sSmI4cjs-1)
-📂 Project Repo: [github.com/Kethanvr/MERN-Refresher-02](https://github.com/Kethanvr/MERN-Refresher-02)
+📂 Project Repo: [https://github.com/royanish0410/media-cloud](https://github.com/royanish0410/media-cloud.git)
 
 -----
 
