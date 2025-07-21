@@ -51,13 +51,13 @@ This is a monolithic Next.js application, not a separate client/server structure
 ### 1\. Clone the Repo
 
 ```bash
-git clone https://github.com/Kethanvr/MERN-Refresher-02.git
+git clone https://github.com/royanish0410/media-cloud.git
 ```
 
 ### 2\. Install Dependencies
 
 ```bash
-cd MERN-Refresher-02
+cd media-cloud
 npm install
 ```
 
