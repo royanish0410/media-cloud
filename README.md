@@ -1,5 +1,5 @@
 
-# MERN Refresher – Full Stack App (Next.js + MongoDB)
+# Media Cloud – Full Stack App (Next.js + MongoDB)
 
 This is a full-stack web app built as an assignment from **Hitesh Choudhary**’s Modern MERN Stack course.
 The course provided the base, and the rest of the project was built independently.
