@@ -1,8 +1,8 @@
-type FetchOptions = {
+type FetchOptions<TBody = unknown> = {
   method: "GET" | "POST" | "PUT" | "DELETE";
   headers?: Record<string, string>;
-  body?: string | FormData | Record<string, any>;
-}
+  body?: string | FormData | TBody;
+};
 
 class ApiClient {
   private baseUrl: string;
@@ -11,11 +11,13 @@ class ApiClient {
     this.baseUrl = baseUrl;
   }
 
-  async request<T>(endpoint: string, options: FetchOptions): Promise<T> {
+  async request<TResponse, TBody = unknown>(
+    endpoint: string,
+    options: FetchOptions<TBody>
+  ): Promise<TResponse> {
     const isFormData = options.body instanceof FormData;
     const headers = { ...options.headers };
     
-    // Don't set Content-Type for FormData as browser will set it with boundary
     if (!isFormData) {
       headers["Content-Type"] = "application/json";
     }
@@ -43,17 +45,24 @@ class ApiClient {
     return response.json();
   }
 
-  // Convenience methods
   async get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
     return this.request<T>(endpoint, { method: "GET", headers });
   }
 
-  async post<T>(endpoint: string, body?: any, headers?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, { method: "POST", body, headers });
+  async post<T, TBody = unknown>(
+    endpoint: string,
+    body?: TBody,
+    headers?: Record<string, string>
+  ): Promise<T> {
+    return this.request<T, TBody>(endpoint, { method: "POST", body, headers });
   }
 
-  async put<T>(endpoint: string, body?: any, headers?: Record<string, string>): Promise<T> {
-    return this.request<T>(endpoint, { method: "PUT", body, headers });
+  async put<T, TBody = unknown>(
+    endpoint: string,
+    body?: TBody,
+    headers?: Record<string, string>
+  ): Promise<T> {
+    return this.request<T, TBody>(endpoint, { method: "PUT", body, headers });
   }
 
   async delete<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
@@ -62,12 +71,17 @@ class ApiClient {
 }
 
 // Create a default instance
-export const apiClient = new ApiClient(process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000');
+export const apiClient = new ApiClient(
+  process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000'
+);
 
-export async function fetchApi<T>(url: string, options: FetchOptions): Promise<T> {
+export async function fetchApi<T, TBody = unknown>(
+  url: string,
+  options: FetchOptions<TBody>
+): Promise<T> {
   const isFormData = options.body instanceof FormData;
   const headers = { ...options.headers };
-  
+
   if (!isFormData) {
     headers["Content-Type"] = "application/json";
   }
