@@ -71,7 +71,7 @@ export async function PUT(
     const updateData: Partial<Ivideo> = {};
 
     if (body.title) updateData.title = body.title;
-    if (body.desciption) updateData.desciption = body.desciption;
+    if (body.description) updateData.description = body.description;
     if (body.videourl) updateData.videourl = body.videourl;
     if (body.thumbnailurl) updateData.thumbnailurl = body.thumbnailurl;
     if (body.controls !== undefined) updateData.controls = body.controls;

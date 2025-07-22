@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,25 +52,14 @@ export default function ProfilePage() {
     redirect("/login");
   }
 
-  useEffect(() => {
-    if (session?.user?.email) {
-      fetchUserData();
-    }
-  }, [session]);
-
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       setLoading(true);
-
-      // Fetch user videos
-      const videosResponse = await fetch(
-        `/api/user/videos?email=${session?.user?.email}`
-      );
+      const videosResponse = await fetch(`/api/user/videos?email=${session?.user?.email}`);
       if (videosResponse.ok) {
         const videos = await videosResponse.json();
         setUserVideos(videos);
-
-        // Calculate stats
+  
         const stats = {
           totalVideos: videos.length,
           totalLikes: videos.reduce(
@@ -93,7 +82,13 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [session?.user?.email]);
+  
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchUserData();
+    }
+  }, [session?.user?.email, fetchUserData]);  
 
   if (status === "loading" || loading) {
     return <ProfileSkeleton />;
@@ -309,9 +304,9 @@ export default function ProfilePage() {
                       About
                     </h3>
                     <p className="text-gray-600 leading-relaxed">
-                      Welcome to my ReelsPro profile! I'm passionate about
+                      Welcome to my ReelsPro profile! I&apos;m passionate about
                       creating and sharing amazing video content. Join me on
-                      this creative journey and let's make something incredible
+                      this creative journey and let&apos;s make something incredible
                       together.
                     </p>
                   </div>

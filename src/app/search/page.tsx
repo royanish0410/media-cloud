@@ -17,7 +17,6 @@ import {
   Clock,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSession } from "next-auth/react";
 
 interface Video {
   _id: string;
@@ -62,7 +61,6 @@ const POPULAR_CATEGORIES = [
 ];
 
 export default function SearchPage() {
-  const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResult>({
     videos: [],
@@ -152,8 +150,7 @@ export default function SearchPage() {
               Discover Amazing Content
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Find trending videos, discover new creators, and explore what's
-              popular right now
+              Find trending videos, discover new creators, and explore what&apos;s popular right now
             </p>
           </div>
 
@@ -428,7 +425,7 @@ export default function SearchPage() {
               <div className="space-y-8">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold text-gray-900">
-                    Search Results for "{searchQuery}"
+                    Search Results for &quot;{searchQuery}&quot;
                   </h2>
                   <div className="text-gray-600">
                     {searchResults.videos.length} videos found

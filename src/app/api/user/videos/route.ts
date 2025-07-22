@@ -1,7 +1,5 @@
-import { authOptions } from "@/lib/auth";
 import { conntodb } from "@/lib/db";
 import Video from "@/models/Video";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {

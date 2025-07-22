@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { VideoFeed } from "@/components/video/video-feed";
 import { Homepage } from "@/components/home/homepage";
-import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
   const { data: session, status } = useSession();
