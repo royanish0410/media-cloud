@@ -9,9 +9,7 @@ import {
   Heart,
   MessageCircle,
   Share2,
-  MoreHorizontal,
   Play,
-  Pause,
   Volume2,
   VolumeX,
   Send,
@@ -122,7 +120,7 @@ export function VideoPlayer({ video, isActive, onVideoEnd }: VideoPlayerProps) {
         setIsLiked(data.liked);
         setLikesCount(data.likes);
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to like video",
@@ -167,12 +165,12 @@ export function VideoPlayer({ video, isActive, onVideoEnd }: VideoPlayerProps) {
           description: "Your comment has been posted",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to post comment",
         variant: "destructive",
-      });
+      });    
     } finally {
       setIsCommenting(false);
     }
@@ -185,14 +183,13 @@ export function VideoPlayer({ video, isActive, onVideoEnd }: VideoPlayerProps) {
         text: video.desciption,
         url: window.location.href,
       });
-    } catch (error) {
-      // Fallback for browsers that don't support Web Share API
+    } catch {
       navigator.clipboard.writeText(window.location.href);
       toast({
         title: "Link copied!",
         description: "Video link copied to clipboard",
       });
-    }
+    }    
   };
 
   return (

@@ -6,14 +6,8 @@ import { Button } from "@/components/ui/button";
 import {
   Video,
   Heart,
-  Share2,
-  MessageCircle,
   Globe,
-  Shield,
-  Smartphone,
   Users,
-  Zap,
-  Eye,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -129,8 +123,8 @@ export function FeaturesSection() {
         {/* Testimonial */}
         <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl p-8 md:p-12 text-white text-center">
           <blockquote className="text-xl md:text-2xl font-medium mb-6 leading-relaxed">
-            "Finally, a platform that doesn't feel like it's working against me.
-            ReelsPro just lets me share my cooking videos without the stress."
+            &quot;Finally, a platform that doesn&apos;t feel like it&apos;s working against me.
+            ReelsPro just lets me share my cooking videos without the stress.&quot;
           </blockquote>
           <div className="flex items-center justify-center gap-4">
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">

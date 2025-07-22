@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { VideoPlayer } from "./video-player";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Wifi, WifiOff, Play } from "lucide-react";
+import { RefreshCw, WifiOff, Play } from "lucide-react";
 import { apiClient } from "@/lib/api-client";
 import { useSession } from "next-auth/react";
 
@@ -48,7 +48,7 @@ interface VideoFeedProps {
   className?: string;
 }
 
-export function VideoFeed({ className }: VideoFeedProps) {
+export function VideoFeed({}: VideoFeedProps) {
   const { data: session } = useSession();
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,13 +88,12 @@ export function VideoFeed({ className }: VideoFeedProps) {
         setHasMore(pagination?.hasNext ?? false);
         setPage(pageNum);
         setError(null);
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to load videos";
         console.error("Failed to fetch videos:", err);
-        setError(err.message || "Failed to load videos");
-        // Set empty array on error to prevent undefined issues
-        if (!append) {
-          setVideos([]);
-        }
+        setError(errorMessage);
+        if (!append) setVideos([]);      
       } finally {
         setLoading(false);
         setLoadingMore(false);

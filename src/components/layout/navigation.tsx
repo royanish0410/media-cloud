@@ -22,16 +22,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { VideoUpload } from "@/components/video/video-upload";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface NavigationProps {
   className?: string;
 }
 
-export function Navigation({ className }: NavigationProps) {
+export function Navigation({}: NavigationProps) {
   const { data: session } = useSession();
-  const router = useRouter();
   const pathname = usePathname();
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 

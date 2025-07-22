@@ -1,15 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Play,
   Users,
   TrendingUp,
   Video,
   Upload,
-  Share2,
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
