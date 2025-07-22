@@ -17,29 +17,23 @@ export const authOptions: NextAuthOptions = {
         email: { label: "email", type: "text", placeholder: "jsmith" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials: any) {
-        if (!credentials.email || !credentials.password) {
+      async authorize(credentials: { email?: string; password?: string } | undefined) {
+        if (!credentials?.email || !credentials?.password) {
           throw new Error("email or password is missing");
         }
-
+      
         try {
           await conntodb();
-          const user = await User.findOne({
-            email: credentials.email,
-          });
+          const user = await User.findOne({ email: credentials.email });
           if (!user) {
             throw new Error("user not found");
           }
-
-          const isvalid = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
-
+      
+          const isvalid = await bcrypt.compare(credentials.password, user.password);
           if (!isvalid) {
             throw new Error("password is incorrect");
           }
-
+      
           return {
             id: user._id.toString(),
             email: user.email,
@@ -48,7 +42,7 @@ export const authOptions: NextAuthOptions = {
           console.error("Error connecting to the database:", error);
           throw new Error("Database connection failed");
         }
-      },
+      }      
     }),
   ],
 
