@@ -59,9 +59,14 @@ export function RegisterForm() {
       setTimeout(() => {
         router.push("/login");
       }, 2000);
-    } catch (error: any) {
-      setError(error.message || "Registration failed");
-    } finally {
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Registration failed");
+      }
+    }
+     finally {
       setIsLoading(false);
     }
   };

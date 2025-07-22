@@ -42,10 +42,11 @@ export function LoginForm() {
         router.push("/");
       }
     } catch (error) {
+      console.error("Login error:", error);
       setError("Something went wrong");
     } finally {
       setIsLoading(false);
-    }
+    }    
   };
 
   return (
@@ -139,7 +140,7 @@ export function LoginForm() {
           <CardFooter className="flex flex-col space-y-4">
             <Separator />
             <p className="text-sm text-center text-muted-foreground">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 href="/register"
                 className="font-medium text-primary hover:underline"
