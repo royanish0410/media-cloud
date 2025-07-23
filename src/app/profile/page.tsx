@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useSession, signOut } from "next-auth/react"
 import { useState, useEffect, useCallback } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -66,6 +68,23 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("videos")
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [selectedVideo, setSelectedVideo] = useState<UserVideo | null>(null)
+  const [isEditingProfile, setIsEditingProfile] = useState(false)
+
+  // Add new state for profile data
+  const [profileData, setProfileData] = useState({
+    name: "",
+    email: "",
+    image: undefined as string | undefined,
+    bio: "",
+  })
+
+  // Update the editForm initialization
+  const [editForm, setEditForm] = useState({
+    name: "",
+    bio: "",
+    profileImage: undefined as string | undefined,
+  })
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   // Redirect if not authenticated
   if (status === "unauthenticated") {
@@ -96,11 +115,67 @@ export default function ProfilePage() {
     }
   }, [session?.user?.email])
 
+  const fetchProfileData = useCallback(async () => {
+    try {
+      const response = await fetch("/api/user/profile")
+      if (response.ok) {
+        const data = await response.json()
+        const profile = {
+          name: data.profile.name || "",
+          email: data.profile.email || "",
+          image: data.profile.image || undefined,
+          bio: data.profile.bio || "",
+        }
+        setProfileData(profile)
+        setEditForm({
+          name: profile.name,
+          bio: profile.bio,
+          profileImage: profile.image,
+        })
+      } else {
+        // If API fails, use session data
+        if (session?.user) {
+          const fallbackProfile = {
+            name: session.user.name || "",
+            email: session.user.email || "",
+            image: session.user.image || undefined,
+            bio: "",
+          }
+          setProfileData(fallbackProfile)
+          setEditForm({
+            name: fallbackProfile.name,
+            bio: fallbackProfile.bio,
+            profileImage: fallbackProfile.image,
+          })
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching profile:", error)
+      // Fallback to session data if API fails
+      if (session?.user) {
+        const fallbackProfile = {
+          name: session.user.name || "",
+          email: session.user.email || "",
+          image: session.user.image || undefined,
+          bio: "",
+        }
+        setProfileData(fallbackProfile)
+        setEditForm({
+          name: fallbackProfile.name,
+          bio: fallbackProfile.bio,
+          profileImage: fallbackProfile.image,
+        })
+      }
+    }
+  }, [session])
+
+  // Update the useEffect to only call fetchProfileData
   useEffect(() => {
     if (session?.user?.email) {
       fetchUserData()
+      fetchProfileData()
     }
-  }, [session?.user?.email, fetchUserData])
+  }, [session?.user?.email, fetchUserData, fetchProfileData])
 
   const handleSignOut = async () => {
     try {
@@ -114,12 +189,93 @@ export default function ProfilePage() {
     }
   }
 
+  const handleEditProfile = () => {
+    setEditForm({
+      name: profileData.name,
+      bio: profileData.bio,
+      profileImage: profileData.image,
+    })
+    setIsEditingProfile(true)
+  }
+
+  const handleSaveProfile = async () => {
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editForm.name.trim(),
+          bio: editForm.bio.trim(),
+          image: editForm.profileImage,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile")
+      }
+
+      const data = await response.json()
+
+      // Update the local profile data immediately
+      const updatedProfile = {
+        name: editForm.name.trim(),
+        email: profileData.email,
+        image: editForm.profileImage,
+        bio: editForm.bio.trim(),
+      }
+      setProfileData(updatedProfile)
+
+      toast.success("Profile updated successfully!")
+      setIsEditingProfile(false)
+
+      // Optionally refresh the page to update session data
+      // window.location.reload()
+    } catch (error) {
+      console.error("Error updating profile:", error)
+      toast.error("Failed to update profile")
+    }
+  }
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file")
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size should be less than 5MB")
+      return
+    }
+
+    try {
+      setUploadingImage(true)
+
+      // Create a preview URL
+      const imageUrl = URL.createObjectURL(file)
+      setEditForm((prev) => ({ ...prev, profileImage: imageUrl }))
+
+      // Here you would typically upload to your backend/cloud storage
+      // For demo purposes, we'll just use the local URL
+      toast.success("Profile picture updated!")
+    } catch (error) {
+      console.error("Error uploading image:", error)
+      toast.error("Failed to upload image")
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
   const handleShareProfile = async () => {
     try {
-      const profileUrl = `${window.location.origin}/profile/${session?.user?.email}`
+      const profileUrl = `${window.location.origin}/profile/${profileData.email}`
       if (navigator.share) {
         await navigator.share({
-          title: `${session?.user?.name}'s Profile`,
+          title: `${profileData.name || "User"}'s Profile`,
           url: profileUrl,
         })
       } else {
@@ -218,7 +374,7 @@ export default function ProfilePage() {
                       <Settings className="w-4 h-4 mr-2" />
                       Settings
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="hover:bg-blue-50/80 text-sm">
+                    <DropdownMenuItem onClick={handleEditProfile} className="hover:bg-blue-50/80 text-sm">
                       <Edit3 className="w-4 h-4 mr-2" />
                       Edit Profile
                     </DropdownMenuItem>
@@ -244,13 +400,14 @@ export default function ProfilePage() {
                   <div className="relative flex-shrink-0">
                     <div className="relative">
                       <Avatar className="w-28 h-28 sm:w-32 sm:h-32 border-4 border-white shadow-lg bg-white">
-                        <AvatarImage src={session?.user?.image || ""} className="object-cover" />
+                        <AvatarImage src={profileData.image || undefined} className="object-cover" />
                         <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-3xl sm:text-4xl font-bold">
-                          {session?.user?.name?.[0] || session?.user?.email?.[0] || "U"}
+                          {profileData.name?.[0] || profileData.email?.[0] || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <Button
                         size="sm"
+                        onClick={handleEditProfile}
                         className="absolute -bottom-2 -right-2 rounded-full w-10 h-10 bg-gradient-to-r from-blue-400 to-indigo-400 hover:from-blue-500 hover:to-indigo-500 shadow-md border-2 border-white transition-all duration-300 hover:scale-110"
                       >
                         <Edit3 className="w-4 h-4" />
@@ -262,9 +419,9 @@ export default function ProfilePage() {
                   <div className="flex-1 text-center lg:text-left min-w-0">
                     <div className="mb-6">
                       <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent leading-tight mb-3">
-                        {session?.user?.name || "Anonymous User"}
+                        {profileData.name || "Anonymous User"}
                       </h1>
-                      <p className="text-gray-600 text-lg mb-4 break-all">{session?.user?.email}</p>
+                      <p className="text-gray-600 text-lg mb-4 break-all">{profileData.email}</p>
 
                       {/* Badges */}
                       <div className="flex gap-2 justify-center lg:justify-start flex-wrap mb-6">
@@ -476,8 +633,8 @@ export default function ProfilePage() {
                         About Me
                       </h3>
                       <p className="text-gray-700 leading-relaxed text-lg">
-                        Welcome to my Shorts profile! I&apos;m passionate about creating and sharing amazing video
-                        content. Join me on this creative journey and let&apos;s make something incredible together.
+                        {profileData.bio ||
+                          "Welcome to my Shorts profile! I'm passionate about creating and sharing amazing video content. Join me on this creative journey and let's make something incredible together."}
                       </p>
                     </div>
 
@@ -540,7 +697,15 @@ export default function ProfilePage() {
               {/* Close button */}
               <Button
                 onClick={closeVideoModal}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 text-white border-0 p-0 backdrop-blur-sm"
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/70 hover:bg-black/90 text-white border-0 p-0 backdrop-blur-sm z-10 shadow-lg"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+
+              {/* Fallback close button for better visibility */}
+              <Button
+                onClick={closeVideoModal}
+                className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 border-0 p-0 shadow-lg z-10 md:hidden"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -563,6 +728,104 @@ export default function ProfilePage() {
                     <Clock className="w-4 h-4" />
                     <span>{formatDate(selectedVideo.createdAt)}</span>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Edit Profile Modal */}
+      {isEditingProfile && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-md mx-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  Edit Profile
+                </h2>
+                <Button
+                  onClick={() => setIsEditingProfile(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="w-8 h-8 rounded-full p-0 hover:bg-gray-100"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div className="space-y-6">
+                {/* Profile Picture Upload */}
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="relative">
+                    <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
+                      <AvatarImage src={editForm.profileImage || undefined} className="object-cover" />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-2xl font-bold">
+                        {editForm.name?.[0] || profileData.email?.[0] || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <label
+                      htmlFor="profile-image-upload"
+                      className="absolute -bottom-1 -right-1 w-8 h-8 bg-gradient-to-r from-blue-400 to-indigo-400 hover:from-blue-500 hover:to-indigo-500 rounded-full flex items-center justify-center cursor-pointer shadow-md border-2 border-white transition-all duration-300 hover:scale-110"
+                    >
+                      {uploadingImage ? (
+                        <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Upload className="w-3 h-3 text-white" />
+                      )}
+                    </label>
+                    <input
+                      id="profile-image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      disabled={uploadingImage}
+                    />
+                  </div>
+                  <p className="text-sm text-gray-600 text-center">
+                    Click the upload icon to change your profile picture
+                  </p>
+                </div>
+
+                {/* Name Field */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Display Name</label>
+                  <input
+                    type="text"
+                    value={editForm.name}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                    placeholder="Enter your display name"
+                  />
+                </div>
+
+                {/* Bio Field */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Bio</label>
+                  <textarea
+                    value={editForm.bio}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, bio: e.target.value }))}
+                    rows={3}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 resize-none"
+                    placeholder="Tell us about yourself..."
+                  />
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    onClick={() => setIsEditingProfile(false)}
+                    variant="outline"
+                    className="flex-1 py-3 rounded-xl border-gray-200 text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveProfile}
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-400 to-indigo-400 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                  >
+                    Save Changes
+                  </Button>
                 </div>
               </div>
             </div>
