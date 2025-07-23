@@ -216,6 +216,7 @@ export default function ProfilePage() {
 
       await response.json()
 
+
       // Update the local profile data immediately
       const updatedProfile = {
         name: editForm.name.trim(),
@@ -697,18 +698,18 @@ export default function ProfilePage() {
               {/* Close button */}
               <Button
                 onClick={closeVideoModal}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/70 hover:bg-black/90 text-white border-0 p-0 backdrop-blur-sm z-10 shadow-lg"
+                className="absolute top-4 right-4 w-10 h-14 rounded-full bg-black/70 hover:bg-black/90 text-white border-0 p-0 backdrop-blur-sm z-10 shadow-lg"
               >
                 <X className="w-5 h-5" />
               </Button>
 
-              {/* Fallback close button for better visibility */}
+              {/* Fallback close button for better visibility 
               <Button
                 onClick={closeVideoModal}
                 className="absolute top-4 left-4 w-10 h-10 rounded-full bg-white/90 hover:bg-white text-gray-800 border-0 p-0 shadow-lg z-10 md:hidden"
               >
                 <X className="w-5 h-5" />
-              </Button>
+              </Button> */}
 
               {/* Video info overlay */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
