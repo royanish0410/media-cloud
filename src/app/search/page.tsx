@@ -11,14 +11,11 @@ import {
   TrendingUp,
   Flame,
   Hash,
-  Play,
   Heart,
   Eye,
   Clock,
   Video,
   Share2,
-  MessageCircle,
-  ThumbsDown,
   ExternalLink,
   Timer,
   Zap,
@@ -106,7 +103,7 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("discover")
   const [recentSearches, setRecentSearches] = useState<string[]>([])
-  const [playingVideos, setPlayingVideos] = useState<Record<string, boolean>>({})
+  const [] = useState<Record<string, boolean>>({})
 
   useEffect(() => {
     fetchTrendingShorts()
