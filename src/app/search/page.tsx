@@ -179,10 +179,12 @@ export default function SearchPage() {
         } else {
           combinedResults.shorts = mainData.shorts || []
           combinedResults.nextPageToken = mainData.nextPageToken
-          console.log(`✅ Main search found ${combinedResults.shorts.length} shorts`)
+          console.log(
+            `✅ Main search found ${(combinedResults.shorts ?? []).length} shorts`
+          )          
 
           // Show debug info if no results
-          if (combinedResults.shorts.length === 0 && mainData.debug) {
+          if ((combinedResults.shorts ?? []).length === 0 && mainData.debug) {
             console.log("🐛 Debug info:", mainData.debug)
             setError(
               `No results found. Debug: API ${mainData.debug.hasYouTubeKey ? "configured" : "missing"}, YouTube: ${mainData.debug.youtubeStatus}, Local: ${mainData.debug.localStatus}`,
